@@ -1,5 +1,4 @@
 import numpy as np
-import pygame
 class Brittlestar:
 
 
@@ -14,7 +13,6 @@ class Brittlestar:
         self.legAng = totalAng/self.legNum
         self.noise = 0
         self.last_action  = 0
-        self.sprite = [pygame.image.load('leg_0.png'),pygame.image.load('leg_1.png'),pygame.image.load('leg_2.png'),pygame.image.load('leg_3.png'),pygame.image.load('leg_4.png')]
     
     def move(self, action):
         self.x,self.y = self.peek(action)

@@ -1,56 +1,59 @@
 import numpy as np
-import pygame as pg
 import heapq
 import time
 
+
+
+class Node:
+    """
+    A* Node
+    """
+
+    def __init__(self, x, y, goal = None):
+        self.x = x
+        self.y = y
+        self.parent = None
+        self.action_into = 0
+        self.children = []
+        if goal is None:
+            goal_dist = np.Inf
+        else:
+            goal_dist = int(np.linalg.norm([goal.x-self.x, goal.y-self.y]))
+        self.goal_dist = goal_dist
+        self.cost_so_far = 0
+
+class KeyHeap(object):
+    def __init__(self, initial=None, key=lambda x:x):
+        self.key = key
+        if initial:
+            self._data = [(key(item), num, item) for num, item in enumerate(initial)]
+            heapq.heapify(self._data)
+        else:
+            self._data = []
+        self.counter = len(self._data)
+
+    def push(self, item):
+        heapq.heappush(self._data, (self.key(item), self.counter, item))
+        self.counter +=1
+
+    def pop(self):
+        return heapq.heappop(self._data)[2]
+
 class A_star:
-    """ 
+    """
     Class for A* planning
     """
 
-    class Node:
-        """
-        A* Node
-        """
 
-        def __init__(self, x, y, goal = None):
-            self.x = x
-            self.y = y
-            self.parent = None
-            self.action_into = 0
-            self.children = []
-            if goal is None:
-                goal_dist = np.Inf
-            else:
-                goal_dist = int(np.linalg.norm([goal.x-self.x, goal.y-self.y]))
-            self.goal_dist = goal_dist
-            self.cost_so_far = 0
-    
-    class KeyHeap(object):
-        def __init__(self, initial=None, key=lambda x:x):
-            self.key = key
-            if initial:
-                self._data = [(key(item), num, item) for num, item in enumerate(initial)]
-                heapq.heapify(self._data)
-            else:
-                self._data = []
-            self.counter = len(self._data)
 
-        def push(self, item):
-            heapq.heappush(self._data, (self.key(item), self.counter, item))
-            self.counter +=1
-
-        def pop(self):
-            return heapq.heappop(self._data)[2]
-    
     def __init__(self, robot, environment, max_iter=500):
         goal = environment.goal
-        self.end = self.Node(goal[0], goal[1], goal = None)
-        self.start = self.Node(robot.x, robot.y, goal = self.end)
+        self.end = Node(goal[0], goal[1], goal = None)
+        self.start = Node(robot.x, robot.y, goal = self.end)
         self.max_iter = max_iter
         self.obstacle_list = environment.obstacles
-        self.node_list = self.KeyHeap(key = lambda node: node.goal_dist )   #maybe make key a function instead of class attribute 
-        self.agent = robot 
+        self.node_list = KeyHeap(key = lambda node: node.goal_dist )   #maybe make key a function instead of class attribute
+        self.agent = robot
         self.goal_tol = self.agent.vel_t
         self.env = environment
 
@@ -70,7 +73,7 @@ class A_star:
         for action in self.agent.actions:
             x,y = self.agent.peek(action,x=node.x, y = node.y)
             if self.collides(x,y,self.obstacle_list):
-                print("Collision!")
+                #print("Collision!")
                 continue
 
             def is_duplicate(x,y):
@@ -89,9 +92,9 @@ class A_star:
                 return duplicate
 
             if is_duplicate(x,y):
-                continue 
-            
-            new_node = self.Node(x,y, goal = self.end)
+                continue
+
+            new_node = Node(x,y, goal = self.end)
 
            # print((x,y,self.end.x,self.end.y,goal_dist+node.cost_so_far+self.agent.vel_t))
 
@@ -103,7 +106,7 @@ class A_star:
             else:
                 self.end.parent = node
                 self.end.action_into = action
-                children.append(self.end)  
+                children.append(self.end)
                 break
         node.children = children
         return children
@@ -113,7 +116,6 @@ class A_star:
         expanded = set([])
         self.node_list.push(self.start)
         for _ in range(self.max_iter):
-            time.sleep(0.25)
             best_node = self.node_list.pop()
             self.env.update(self.node_list)
 
@@ -126,15 +128,15 @@ class A_star:
             children = self.expand(best_node)
             expanded.add(best_node)
             self.node_list.push(best_node) #something about popping breaks it
-      
+
 
             for node in children:
                 self.node_list.push(node)
                 if node is self.end:
-                    print ("Found end")
+                    #print ("Found end")
                     self.env.update(self.node_list)
                     return self.node_list
-            print(len(self.node_list._data))
+            #print(len(self.node_list._data))
         return None
 
 
@@ -146,9 +148,10 @@ class A_star:
             print((node.x,node.y))
         """
         path = []
-        path_nodes = self.KeyHeap(key = lambda n: n.goal_dist + n.cost_so_far)
+        path_nodes = KeyHeap(key = lambda n: n.goal_dist + n.cost_so_far)
         if graph is None:
-            print("Unable to reach goal.")
+            #print("Unable to reach goal.")
+            pass
         else:
             node = graph.pop()
             while node is not None:
@@ -161,14 +164,13 @@ class A_star:
 
 
 
-            
+
 
 if __name__ == "__main__":
     from robot import Brittlestar
     from environment import Environment
-    import pygame
     import random
-    pygame.init()
+    import matplotlib.pyplot as plt
 
     obst1 = [(300,300,50), (200,500,100),(400,500,100),(600,500,100)]
     obst2 = [(200,500,80),(300,500,80),(400,500,80),(500,500,80),
@@ -178,10 +180,6 @@ if __name__ == "__main__":
     planner = A_star(robot,env,max_iter=10000)
     path,path_nodes = planner.plan()
     print(path)
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-        env.update(path_nodes)
+
 
 
