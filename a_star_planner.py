@@ -1,8 +1,10 @@
 import numpy as np
 import heapq
 import time
-
-
+from robot import Brittlestar
+from environment import Environment
+import random
+import matplotlib.pyplot as plt
 
 class Node:
     """
@@ -164,14 +166,8 @@ class A_star:
 
 
 
-
-
-if __name__ == "__main__":
-    from robot import Brittlestar
-    from environment import Environment
-    import random
-    import matplotlib.pyplot as plt
-
+def main():
+    random.seed(1)
     obst1 = [(300,300,50), (200,500,100),(400,500,100),(600,500,100)]
     obst2 = [(200,500,80),(300,500,80),(400,500,80),(500,500,80),
     (600,500,80),(700,500,80),(800,500,80),(900,500,80),(1000,500,80)]
@@ -180,6 +176,9 @@ if __name__ == "__main__":
     planner = A_star(robot,env,max_iter=10000)
     path,path_nodes = planner.plan()
     print(path)
+
+if __name__ == "__main__":
+    main()
 
 
 
