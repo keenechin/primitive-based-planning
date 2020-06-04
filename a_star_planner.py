@@ -1,5 +1,8 @@
 import numpy as np
 import heapq
+from robot import Brittlestar
+from environment import Environment
+import random
 
 
 class Node:
@@ -156,9 +159,6 @@ class A_star:
 
 
 if __name__ == "__main__":
-    from robot import Brittlestar
-    from environment import Environment
-    import random
 
     obst1 = [(300, 300, 50), (200, 500, 100), (400, 500, 100), (600, 500, 100)]
     obst2 = [(200, 500, 80), (300, 500, 80), (400, 500, 80), (500, 500, 80),
